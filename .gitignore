@@ -1,0 +1,5 @@
+/target
+.data/*.log
+/src/prisma.rs
+/prisma/dev.db*
+/dev.db

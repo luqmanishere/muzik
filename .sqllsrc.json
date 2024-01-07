@@ -1,0 +1,10 @@
+{
+  "connections": [
+    {
+      "name": "muzik-tui",
+      "adapter": "sqlite3",
+      "filename": "./prisma/dev.db",
+      "projectPaths": ["."]
+    }
+  ]
+}
