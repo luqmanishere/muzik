@@ -1,13 +1,12 @@
 use color_eyre::eyre::{eyre, Result};
 use ratatui::prelude::*;
 
+use super::Component;
 use crate::{
   config::Config,
   layouts::{Focus, ManagerLayouts, Scenes},
   mode::Mode,
 };
-
-use super::Component;
 
 #[derive(Default, Clone, Debug)]
 pub enum DisplayMode {

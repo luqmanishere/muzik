@@ -7,7 +7,7 @@ use tracing::error;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{self, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
 
-pub static GIT_COMMIT_HASH: &'static str = env!("_GIT_INFO");
+pub static GIT_COMMIT_HASH: &str = env!("_GIT_INFO");
 
 lazy_static! {
   pub static ref PROJECT_NAME: String = env!("CARGO_CRATE_NAME").to_uppercase().to_string();

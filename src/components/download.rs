@@ -10,13 +10,12 @@ use tokio::sync::{mpsc::UnboundedSender, oneshot};
 use tracing::{debug, info, trace, warn};
 use youtube_dl::{SearchOptions, SingleVideo, YoutubeDl, YoutubeDlOutput};
 
+use super::Component;
 use crate::{
   action::{Action, InputIn, InputOut},
   layouts::{Focus, Scenes},
   mode::Mode,
 };
-
-use super::Component;
 
 #[derive(Default)]
 pub struct SearchBar {
@@ -64,24 +63,19 @@ impl Component for SearchBar {
     key: crossterm::event::KeyEvent,
     focus: Focus,
   ) -> Result<Option<crate::action::Action>> {
-    if focus.mode == self.mode() {
-      if key.modifiers == KeyModifiers::NONE && key.code == KeyCode::Char('s') {
-        return Ok(Some(Action::InputModeOn(InputIn {
-          input_name: "youtube_search".to_string(),
-          initial_value: None,
-        })));
-      }
+    if focus.mode == self.mode() && key.modifiers == KeyModifiers::NONE && key.code == KeyCode::Char('s') {
+      return Ok(Some(Action::InputModeOn(InputIn { input_name: "youtube_search".to_string(), initial_value: None })));
     }
     Ok(None)
   }
+
   fn update(&mut self, action: Action) -> Result<Option<Action>> {
     match action {
-      Action::InputModeOff(InputOut { input_name, buffer }) => {
-        if let Some(input_name) = input_name {
-          if input_name == "youtube_search".to_string() {
-            self.search_query = buffer;
-            // we will not be the component that sends the search request
-          }
+      // woah that collapsible matching clippy hint was cool af
+      Action::InputModeOff(InputOut { input_name: Some(input_name), buffer }) => {
+        if input_name == *"youtube_search" {
+          self.search_query = buffer;
+          // we will not be the component that sends the search request
         }
       },
       _ => {},
@@ -198,7 +192,7 @@ impl Component for SearchResult {
       },
       Action::InputModeOff(InputOut { input_name, buffer }) => {
         if let Some(input_name) = input_name {
-          if input_name == "youtube_search".to_string() {
+          if input_name == *"youtube_search" {
             self.search_query = buffer;
             // build the search request
             let search_query = self.search_query.clone();
@@ -219,27 +213,25 @@ impl Component for SearchResult {
   }
 
   fn handle_key_events(&mut self, key: crossterm::event::KeyEvent, focus: Focus) -> Result<Option<Action>> {
-    if self.is_focused(focus) {
-      if key.modifiers == KeyModifiers::NONE {
-        match key.code {
-          KeyCode::Char('j') | KeyCode::Down => {
-            self.list_next();
-            return Ok(Some(Action::DownloadShowSearchDetails(self.get_current_selected_list_youtube_video())));
-          },
-          KeyCode::Char('k') | KeyCode::Up => {
-            self.previous_list();
-            return Ok(Some(Action::DownloadShowSearchDetails(self.get_current_selected_list_youtube_video())));
-          },
-          KeyCode::Esc => {
-            if self.search_result_list_state.selected().is_some() {
-              self.unselect_list();
-            } else {
-              return Ok(Some(Action::FocusBack));
-            }
-            return Ok(Some(Action::DownloadShowSearchDetails(None)));
-          },
-          _ => {},
-        }
+    if self.is_focused(focus) && key.modifiers == KeyModifiers::NONE {
+      match key.code {
+        KeyCode::Char('j') | KeyCode::Down => {
+          self.list_next();
+          return Ok(Some(Action::DownloadShowSearchDetails(self.get_current_selected_list_youtube_video())));
+        },
+        KeyCode::Char('k') | KeyCode::Up => {
+          self.previous_list();
+          return Ok(Some(Action::DownloadShowSearchDetails(self.get_current_selected_list_youtube_video())));
+        },
+        KeyCode::Esc => {
+          if self.search_result_list_state.selected().is_some() {
+            self.unselect_list();
+          } else {
+            return Ok(Some(Action::FocusBack));
+          }
+          return Ok(Some(Action::DownloadShowSearchDetails(None)));
+        },
+        _ => {},
       }
     }
     Ok(None)

@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use color_eyre::eyre::{eyre, Context, Result};
 use diesel::{prelude::*, Connection, QueryDsl, RunQueryDsl, SelectableHelper, SqliteConnection};
 use tracing::debug;
@@ -9,7 +11,6 @@ use crate::{
   },
   schema::{album, artist, genre, song, songs_artists},
 };
-use std::path::{Path, PathBuf};
 
 pub struct Database {
   connection: SqliteConnection,
@@ -197,21 +198,19 @@ impl Database {
 
     debug!("{:?}", &all_songs);
 
-    /*
-    let artists = SongArtist::belonging_to(&all_songs)
-      .inner_join(artist::table)
-      .select((SongArtist::as_select(), Artist::as_select()))
-      .load(&mut self.connection)?;
-    debug!("{:?}", &artists);
-
-    let artists_per_song: Vec<(Song, Vec<Artist>)> = artists
-      .grouped_by(&all_songs)
-      .into_iter()
-      .zip(all_songs)
-      .zip(albums_per_song).zip()
-      .map(|(artist, song)| (song, artist.into_iter().map(|(_, artist)| artist).collect()))
-      .collect();
-    */
+    // let artists = SongArtist::belonging_to(&all_songs)
+    // .inner_join(artist::table)
+    // .select((SongArtist::as_select(), Artist::as_select()))
+    // .load(&mut self.connection)?;
+    // debug!("{:?}", &artists);
+    //
+    // let artists_per_song: Vec<(Song, Vec<Artist>)> = artists
+    // .grouped_by(&all_songs)
+    // .into_iter()
+    // .zip(all_songs)
+    // .zip(albums_per_song).zip()
+    // .map(|(artist, song)| (song, artist.into_iter().map(|(_, artist)| artist).collect()))
+    // .collect();
 
     Ok(all_songs)
   }
@@ -232,12 +231,11 @@ mod tests {
   use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
   use pretty_assertions::assert_eq;
 
+  use super::*;
   use crate::{
     config::Config,
     models::{NewAlbum, NewArtist, NewGenre, NewSong, Song, SongArtist},
   };
-
-  use super::*;
 
   // embed migrations into tests
   pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();

@@ -69,12 +69,12 @@ diesel::joinable!(songs_genres -> genre (genre_id));
 diesel::joinable!(songs_genres -> song (song_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    album,
-    artist,
-    file,
-    genre,
-    song,
-    songs_albums,
-    songs_artists,
-    songs_genres,
+  album,
+  artist,
+  file,
+  genre,
+  song,
+  songs_albums,
+  songs_artists,
+  songs_genres,
 );

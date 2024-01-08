@@ -7,14 +7,13 @@ use ratatui::{
 };
 use tokio::sync::mpsc::UnboundedSender;
 
+use super::Component;
 use crate::{
   action::{Action, InputIn, InputOut},
   layouts::{Focus, Scenes},
   mode::Mode,
   tui::Frame,
 };
-
-use super::Component;
 
 #[derive(Default)]
 pub struct TitleBar {}
@@ -86,46 +85,45 @@ impl Component for InputArea {
   }
 
   fn handle_key_events(&mut self, key: KeyEvent, focus: Focus) -> Result<Option<Action>> {
-    if self.is_focused(focus) {
-      if key.kind == KeyEventKind::Press
-        && (key.modifiers == KeyModifiers::SHIFT || key.modifiers == KeyModifiers::NONE)
-      {
-        match key.code {
-          KeyCode::Char(c) => {
-            self.input_buffer.insert(self.position, c);
+    if self.is_focused(focus)
+      && key.kind == KeyEventKind::Press
+      && (key.modifiers == KeyModifiers::SHIFT || key.modifiers == KeyModifiers::NONE)
+    {
+      match key.code {
+        KeyCode::Char(c) => {
+          self.input_buffer.insert(self.position, c);
+          self.position += 1;
+        },
+        KeyCode::Enter => {
+          return Ok(Some(Action::InputModeOff(InputOut {
+            input_name: self.input_name.clone(),
+            buffer: self.input_buffer.clone(),
+          })))
+        },
+        KeyCode::Right => {
+          if self.position < self.input_buffer.len() {
             self.position += 1;
-          },
-          KeyCode::Enter => {
-            return Ok(Some(Action::InputModeOff(InputOut {
-              input_name: self.input_name.clone(),
-              buffer: self.input_buffer.clone(),
-            })))
-          },
-          KeyCode::Right => {
-            if self.position < self.input_buffer.len() {
-              self.position += 1;
+          }
+        },
+        KeyCode::Left => {
+          if self.position > 0 {
+            self.position -= 1;
+          }
+        },
+        KeyCode::Backspace => {
+          // out of bounds is a pain
+          if self.position >= 1 {
+            // we cannot remove the end of the string
+            if self.position == self.input_buffer.len() {
+              self.input_buffer.pop();
+            } else {
+              self.input_buffer.remove(self.position - 1);
             }
-          },
-          KeyCode::Left => {
-            if self.position > 0 {
-              self.position -= 1;
-            }
-          },
-          KeyCode::Backspace => {
-            // out of bounds is a pain
-            if self.position >= 1 {
-              // we cannot remove the end of the string
-              if self.position == self.input_buffer.len() {
-                self.input_buffer.pop();
-              } else {
-                self.input_buffer.remove(self.position - 1);
-              }
-              self.position -= 1;
-            }
-          },
-          KeyCode::Esc => return Ok(Some(Action::InputModeOff(InputOut::default()))),
-          _ => {},
-        }
+            self.position -= 1;
+          }
+        },
+        KeyCode::Esc => return Ok(Some(Action::InputModeOff(InputOut::default()))),
+        _ => {},
       }
     }
     Ok(None)

@@ -51,6 +51,7 @@ impl App {
     let mode = Mode::Home;
     let first_focus = Focus { mode, scene: Scenes::Home(HomeLayouts::Intro) };
     let layout_manager = LayoutManager::new();
+    // TODO: optimize this with a macro or something
     let components: Vec<Box<(dyn Component + 'static)>> = vec![
       Box::new(home),
       Box::new(fps),
